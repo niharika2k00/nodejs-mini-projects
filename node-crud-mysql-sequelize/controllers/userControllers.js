@@ -1,3 +1,5 @@
+import { QueryTypes } from "sequelize";
+import sequelize from "../config/db.js";
 import User from "../models/User.js";
 
 // @route: GET /api/users
@@ -17,6 +19,22 @@ const getUser = async (req, res) => {
       attributes: { exclude: ["password"] },
     });
     res.status(200).json(user);
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// @route: GET /api/users/raw/:id
+const getUserRaw = async (req, res) => {
+  try {
+    const [user] = await sequelize.query(
+      "SELECT id, name, email FROM users WHERE id = :id",
+      {
+        replacements: { id: req.params.id },
+        type: QueryTypes.SELECT,
+      }
+    );
+    res.status(200).json(user || null);
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
@@ -81,4 +99,4 @@ const deleteUser = async (req, res) => {
   }
 };
 
-export { getAllUsers, getUser, createUser, bulkCreateUsers, updateUser, deleteUser };
+export { getAllUsers, getUser, getUserRaw, createUser, bulkCreateUsers, updateUser, deleteUser };
